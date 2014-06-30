@@ -19,7 +19,7 @@
 *
 *  @author PrestaShop SA <contact@prestashop.com>
 *  @copyright  2007-2014 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*  @license	http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
 if (!defined('_CAN_LOAD_FILES_'))
@@ -27,83 +27,117 @@ if (!defined('_CAN_LOAD_FILES_'))
 
 class multistorecss extends Module
 {
+	private static $cssKey = 'storestyle';
+
 	public function __construct()
 	{
 		$this->name = 'multistorecss';
 		$this->tab = 'front_office_features';
 		$this->version = '1.0';
-		$this -> author = 'David Janke';
+		$this->ps_versions_compliancy = array('min' => '1.5');
+		$this->author = 'David Janke';
+
 		parent::__construct();
+
 		$this->displayName = $this->l('Multistore CSS Module');
-		$this->description = $this->l('Define shop-specific CSS');
+		$this->description = $this->l('Define shop-specific CSS rules');
 	}
 
 	public function install()
 	{
 		$this->_clearCache('multistorecss.tpl');
-		return (parent::install() 
-				&& Configuration::updateValue('storestyle', '')
-				&& $this->registerHook('header'));
+		if (Shop::isFeatureActive()) {
+  			Shop::setContext(Shop::CONTEXT_ALL);
+		}
+		return parent::install() &&
+				Configuration::updateValue(multistorecss::$cssKey, '') &&
+				$this->registerHook('header');
 	}
 
 	public function uninstall()
-
 	{
 
 		$this->_clearCache('multistorecss.tpl');
-		return (Configuration::deleteByName('storestyle') && parent::uninstall());
+		return parent::uninstall() &&
+				Configuration::deleteByName(multistorecss::$cssKey);
+	}
+
+	public function getSubmitId() {
+		return 'submit' . $this->name;
 	}
 
 	public function getContent()
 	{
-		$html = '';
-		if (isset($_POST['submitModule']))
-		{	
-			Configuration::updateValue('storestyle', ((isset($_POST['storestyle']) && $_POST['storestyle'] != '') ? $_POST['storestyle'] : ''),  true);
-			$html .= '<div class="confirm">'.$this->l('Configuration updated').'</div>';
+		$output = '';
+		if(Tools::isSubmit($this->getSubmitId())) {
+			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
+			if($storeStyle) {
+				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
+				$output = 'CSS updated';
+			} else {
+				// TODO: What would cause this? How should the users respond?
+				$output = 'Could not access the CSS rules. Restart your browser and try again.';
+			}
 		}
-		$html .= '
-		<h2>'.$this->displayName.'</h2>
-		<form action="'.$_SERVER['REQUEST_URI'].'" method="post">
-			<fieldset>	
-				<p><label for="storestyle">'.$this->l('Custom CSS').' :</label>
-				<textarea id="storestyle" name="storestyle" cols="100" rows="12">'.Configuration::get('storestyle').'</textarea></p>
-				<div class="margin-form">
-					<input type="submit" name="submitModule" value="'.$this->l('Save').'" class="button" /></center>
-				</div>
-			</fieldset>
-		</form>
-		<h2>CSS Module Reference</h2>
-		<fieldset>
-		<p>The way that the module works is that it appends the CSS directly to the page. This should override the CSS files and make your changes the most prominent. If a changes does not take effect, you can try to use the modifier !important and that should work.
-<br><br>
-Also you should use either Google Chrome or Firefox with Firebug to figure out the targeting of the CSS you are trying to change. You can access the CSS reference here, http://www.w3schools.com/cssref/default.asp
-<br>
-<br><strong>Prestashop 1.5 common classes and ids, you can use these copy these and add CSS to them to change your theme.</strong>
-<br>
-<br><strong>Logo</strong> - .logo{}
+		return $output . $this->displayForm();
+	}
 
-<br><strong>Product Name</strong> - #pb-left-column h1 {}
+	public function displayForm() {
+		$default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
-<br><strong>Main Background</strong> - body{}
+		$fields_form[0]['form'] = array(
+			'legend' => array(
+				'title' => $this->l('Settings'),
+			),
+			'input' => array(
+				array(
+					'type' => 'textarea',
+					'label' => $this->l('CSS'),
+					'name' => multistorecss::$cssKey,
+					'cols' => 100,
+					'rows' => 20,
+					'required' => true
+				)
+			),
+			'submit' => array(
+				'title' => $this->l('Save'),
+				'class' => 'button'
+			)
+		);
 
-<br><strong>Main Footer</strong> - #footer{}
+		$helper = new HelperForm();
+		$helper->module = $this;
+		$helper->name_controller = $this->name;
+		$helper->token = Tools::getAdminTokenLite('AdminModules');
+		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
+		$helper->default_form_language = $default_lang;
+		$helper->allow_employee_form_lang = $default_lang;
+		$helper->title = $this->displayName;
+		$helper->show_toolbar = true;
+		$helper->toolbar_scroll = true;
+		$helper->submit_action = $this->getSubmitId();
+		$helper->toolbar_btn = array(
+			'save' => array(
+						'desc' => $this->l('Save'),
+						'href' => AdminController::$currentIndex .
+									'&configure=' . $this->name .
+									'&save=' . $this->name .
+									'&token=' . Tools::getAdminTokenLite('AdminModules')),
+			'back' => array(
+						'desc' => $this->l('Back to list'),
+						'href' => AdminController::$currentIndex .
+									'&token=' . Tools::getAdminTokenLite('AdminModules'))
+		);
+		$helper->fields_value[multistorecss::$cssKey] = Configuration::get(multistorecss::$cssKey);
 
-<br><strong>Menu Background</strong> - .sf-menu{}
-
-<br><strong>Menu Hover Color</strong> - .sf-menu li {}
-
-<br><strong>Category Heading</strong> - h1{}</p>
-		</fieldset>
-		';
-		return $html;
+		return $helper->generateForm($fields_form);
 	}
 
 	public function hookHeader($params) {
 		if (!$this->isCached('multistorecss.tpl', $this->getCacheId())) {	
 			global $smarty;
 			$smarty->assign(array(
-				'storestyle' => Configuration::get('storestyle')
+				multistorecss::$cssKey => Configuration::get(multistorecss::$cssKey)
 			));
 		}
 			return $this->display(__FILE__, 'multistorecss.tpl', $this->getCacheId());
