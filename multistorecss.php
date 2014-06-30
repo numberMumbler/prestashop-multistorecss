@@ -19,7 +19,7 @@
 *
 *  @author PrestaShop SA <contact@prestashop.com>
 *  @copyright  2007-2014 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*  @license	http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
 if (!defined('_CAN_LOAD_FILES_'))
@@ -27,13 +27,15 @@ if (!defined('_CAN_LOAD_FILES_'))
 
 class multistorecss extends Module
 {
+	private static $cssKey = 'storestyle';
+
 	public function __construct()
 	{
 		$this->name = 'multistorecss';
 		$this->tab = 'front_office_features';
 		$this->version = '1.0';
 		$this->ps_versions_compliancy = array('min' => '1.5');
-		$this -> author = 'David Janke';
+		$this->author = 'David Janke';
 
 		parent::__construct();
 
@@ -48,7 +50,7 @@ class multistorecss extends Module
   			Shop::setContext(Shop::CONTEXT_ALL);
 		}
 		return parent::install() &&
-				Configuration::updateValue('storestyle', '') &&
+				Configuration::updateValue(multistorecss::$cssKey, '') &&
 				$this->registerHook('header');
 	}
 
@@ -57,27 +59,85 @@ class multistorecss extends Module
 
 		$this->_clearCache('multistorecss.tpl');
 		return parent::uninstall() &&
-				Configuration::deleteByName('storestyle');
+				Configuration::deleteByName(multistorecss::$cssKey);
+	}
+
+	public function getSubmitId() {
+		return 'submit' . $this->name;
 	}
 
 	public function getContent()
 	{
-		$html = '';
-		if (isset($_POST['submitModule']) &&
-			isset($_POST['storestyle']) &&
-			$_POST['storestyle'] != '')
-		{	
-			Configuration::updateValue('storestyle', $_POST['storestyle'] : '',  true);
-			$html .= '<div class="confirm">'.$this->l('Configuration updated').'</div>';
+		$output = '';
+		if(Tools::isSubmit($this->getSubmitId())) {
+			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
+			if($storeStyle) {
+				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
+				$output = 'CSS updated';
+			} else {
+				// TODO: What would cause this? How should the users respond?
+				$output = 'Could not access the CSS rules. Restart your browser and try again.';
+			}
 		}
-		return $html;
+		return $output . $this->displayForm();
+	}
+
+	public function displayForm() {
+		$default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
+
+		$fields_form[0]['form'] = array(
+			'legend' => array(
+				'title' => $this->l('Settings'),
+			),
+			'input' => array(
+				array(
+					'type' => 'textarea',
+					'label' => $this->l('CSS'),
+					'name' => multistorecss::$cssKey,
+					'cols' => 100,
+					'rows' => 20,
+					'required' => true
+				)
+			),
+			'submit' => array(
+				'title' => $this->l('Save'),
+				'class' => 'button'
+			)
+		);
+
+		$helper = new HelperForm();
+		$helper->module = $this;
+		$helper->name_controller = $this->name;
+		$helper->token = Tools::getAdminTokenLite('AdminModules');
+		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
+		$helper->default_form_language = $default_lang;
+		$helper->allow_employee_form_lang = $default_lang;
+		$helper->title = $this->displayName;
+		$helper->show_toolbar = true;
+		$helper->toolbar_scroll = true;
+		$helper->submit_action = $this->getSubmitId();
+		$helper->toolbar_btn = array(
+			'save' => array(
+						'desc' => $this->l('Save'),
+						'href' => AdminController::$currentIndex .
+									'&configure=' . $this->name .
+									'&save=' . $this->name .
+									'&token=' . Tools::getAdminTokenLite('AdminModules')),
+			'back' => array(
+						'desc' => $this->l('Back to list'),
+						'href' => AdminController::$currentIndex .
+									'&token=' . Tools::getAdminTokenLite('AdminModules'))
+		);
+		$helper->fields_value[multistorecss::$cssKey] = Configuration::get(multistorecss::$cssKey);
+
+		return $helper->generateForm($fields_form);
 	}
 
 	public function hookHeader($params) {
 		if (!$this->isCached('multistorecss.tpl', $this->getCacheId())) {	
 			global $smarty;
 			$smarty->assign(array(
-				'storestyle' => Configuration::get('storestyle')
+				multistorecss::$cssKey => Configuration::get(multistorecss::$cssKey)
 			));
 		}
 			return $this->display(__FILE__, 'multistorecss.tpl', $this->getCacheId());
