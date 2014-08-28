@@ -73,10 +73,10 @@ class multistorecss extends Module
 			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
 			if($storeStyle) {
 				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
-				$output = 'CSS updated';
+				$output = $this->displayConfirmation($this->l('CSS updated'));
 			} else {
 				// TODO: What would cause this? How should the users respond?
-				$output = 'Could not access the CSS rules. Restart your browser and try again.';
+				$output = $this->displayError($this->l('Could not access the CSS rules. Restart your browser and try again.'));
 			}
 		}
 		return $output . $this->displayForm();
