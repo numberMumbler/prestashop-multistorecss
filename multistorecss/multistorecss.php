@@ -73,10 +73,10 @@ class multistorecss extends Module
 			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
 			if($storeStyle) {
 				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
-				$output = 'CSS updated';
+				$output = $this->displayConfirmation($this->l('CSS updated'));
 			} else {
 				// TODO: What would cause this? How should the users respond?
-				$output = 'Could not access the CSS rules. Restart your browser and try again.';
+				$output = $this->displayError($this->l('Could not access the CSS rules. Restart your browser and try again.'));
 			}
 		}
 		return $output . $this->displayForm();
@@ -88,6 +88,11 @@ class multistorecss extends Module
 		$fields_form[0]['form'] = array(
 			'legend' => array(
 				'title' => $this->l('Settings'),
+			),
+			'message' => array(
+				'type' => 'div',
+				'class' => 'multishop_info',
+				'html' => 'Changes apply to shop '.$this->context->shop->name
 			),
 			'input' => array(
 				array(
@@ -130,7 +135,7 @@ class multistorecss extends Module
 		);
 		$helper->fields_value[multistorecss::$cssKey] = Configuration::get(multistorecss::$cssKey);
 
-		return $helper->generateForm($fields_form);
+		return $this->displayShopInfo() . $helper->generateForm($fields_form);
 	}
 
 	public function hookHeader($params) {
@@ -141,5 +146,29 @@ class multistorecss extends Module
 			));
 		}
 			return $this->display(__FILE__, 'multistorecss.tpl', $this->getCacheId());
+	}
+
+	public function displayShopInfo() {
+		$output = '';
+		if (Shop::getContext() != Shop::CONTEXT_SHOP) {
+			$output = $this->displayWarning($this->l('CSS can only be applied to specific shops. Please select one above'));
+		}
+		return $output;
+	}
+
+	public function displayInfo($string) {
+	   $output = '
+	   <div class="multishop_info">
+	      '.$string.'
+	   </div>';
+	   return $output;
+	}
+
+	public function displayWarning($string) {
+	   $output = '
+	   <div class="multishop_warning">
+	      '.$string.'
+	   </div>';
+	   return $output;
 	}
 }
