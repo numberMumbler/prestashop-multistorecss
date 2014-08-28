@@ -89,6 +89,11 @@ class multistorecss extends Module
 			'legend' => array(
 				'title' => $this->l('Settings'),
 			),
+			'message' => array(
+				'type' => 'div',
+				'class' => 'multishop_info',
+				'html' => 'Changes apply to shop '.$this->context->shop->name
+			),
 			'input' => array(
 				array(
 					'type' => 'textarea',
@@ -130,7 +135,7 @@ class multistorecss extends Module
 		);
 		$helper->fields_value[multistorecss::$cssKey] = Configuration::get(multistorecss::$cssKey);
 
-		return $helper->generateForm($fields_form);
+		return $this->displayShopInfo() . $helper->generateForm($fields_form);
 	}
 
 	public function hookHeader($params) {
@@ -141,5 +146,29 @@ class multistorecss extends Module
 			));
 		}
 			return $this->display(__FILE__, 'multistorecss.tpl', $this->getCacheId());
+	}
+
+	public function displayShopInfo() {
+		$output = '';
+		if (Shop::getContext() != Shop::CONTEXT_SHOP) {
+			$output = $this->displayWarning($this->l('CSS can only be applied to specific shops. Please select one above'));
+		}
+		return $output;
+	}
+
+	public function displayInfo($string) {
+	   $output = '
+	   <div class="multishop_info">
+	      '.$string.'
+	   </div>';
+	   return $output;
+	}
+
+	public function displayWarning($string) {
+	   $output = '
+	   <div class="multishop_warning">
+	      '.$string.'
+	   </div>';
+	   return $output;
 	}
 }
