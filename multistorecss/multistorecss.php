@@ -158,7 +158,7 @@ class multistorecss extends Module
 
 	public function displayInfo($string) {
 	   $output = '
-	   <div class="multishop_info">
+	   <div class="info">
 	      '.$string.'
 	   </div>';
 	   return $output;
@@ -166,7 +166,7 @@ class multistorecss extends Module
 
 	public function displayWarning($string) {
 	   $output = '
-	   <div class="multishop_warning">
+	   <div class="warn">
 	      '.$string.'
 	   </div>';
 	   return $output;
