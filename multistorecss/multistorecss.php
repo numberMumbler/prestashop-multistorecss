@@ -33,7 +33,7 @@ class multistorecss extends Module
 	{
 		$this->name = 'multistorecss';
 		$this->tab = 'front_office_features';
-		$this->version = '1.0';
+		$this->version = '1.0.1';
 		$this->ps_versions_compliancy = array('min' => '1.5');
 		$this->author = 'David Janke';
 
@@ -47,7 +47,7 @@ class multistorecss extends Module
 	{
 		$this->_clearCache('multistorecss.tpl');
 		if (Shop::isFeatureActive()) {
-  			Shop::setContext(Shop::CONTEXT_ALL);
+			Shop::setContext(Shop::CONTEXT_ALL);
 		}
 		return parent::install() &&
 				Configuration::updateValue(multistorecss::$cssKey, '') &&
@@ -157,18 +157,18 @@ class multistorecss extends Module
 	}
 
 	public function displayInfo($string) {
-	   $output = '
-	   <div class="multishop_info">
-	      '.$string.'
-	   </div>';
-	   return $output;
+		$output = '
+		<div class="info">
+			'.$string.'
+		</div>';
+		return $output;
 	}
 
 	public function displayWarning($string) {
-	   $output = '
-	   <div class="multishop_warning">
-	      '.$string.'
-	   </div>';
-	   return $output;
+		$output = '
+		<div class="warn">
+			'.$string.'
+		</div>';
+		return $output;
 	}
 }
