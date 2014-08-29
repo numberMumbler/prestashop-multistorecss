@@ -33,7 +33,7 @@ class multistorecss extends Module
 	{
 		$this->name = 'multistorecss';
 		$this->tab = 'front_office_features';
-		$this->version = '1.0';
+		$this->version = '1.0.1';
 		$this->ps_versions_compliancy = array('min' => '1.5');
 		$this->author = 'David Janke';
 
