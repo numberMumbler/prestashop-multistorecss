@@ -47,7 +47,7 @@ class multistorecss extends Module
 	{
 		$this->_clearCache('multistorecss.tpl');
 		if (Shop::isFeatureActive()) {
-  			Shop::setContext(Shop::CONTEXT_ALL);
+			Shop::setContext(Shop::CONTEXT_ALL);
 		}
 		return parent::install() &&
 				Configuration::updateValue(multistorecss::$cssKey, '') &&
@@ -157,18 +157,18 @@ class multistorecss extends Module
 	}
 
 	public function displayInfo($string) {
-	   $output = '
-	   <div class="info">
-	      '.$string.'
-	   </div>';
-	   return $output;
+		$output = '
+		<div class="info">
+			'.$string.'
+		</div>';
+		return $output;
 	}
 
 	public function displayWarning($string) {
-	   $output = '
-	   <div class="warn">
-	      '.$string.'
-	   </div>';
-	   return $output;
+		$output = '
+		<div class="warn">
+			'.$string.'
+		</div>';
+		return $output;
 	}
 }
