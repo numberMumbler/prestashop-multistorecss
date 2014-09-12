@@ -71,7 +71,7 @@ class multistorecss extends Module
 		$output = '';
 		if(Tools::isSubmit($this->getSubmitId())) {
 			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
-			if($storeStyle) {
+			if(isset($storeStyle)) {
 				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
 				$output = $this->displayConfirmation($this->l('CSS updated'));
 			} else {
