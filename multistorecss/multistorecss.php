@@ -51,7 +51,7 @@ class multistorecss extends Module
 		}
 		return parent::install() &&
 				Configuration::updateValue(multistorecss::$cssKey, '') &&
-				$this->registerHook('header');
+				$this->registerHook('displayHeader');
 	}
 
 	public function uninstall()
