@@ -28,7 +28,6 @@ if (!defined('_CAN_LOAD_FILES_'))
 class multistorecss extends Module
 {
 	private static $cssKey = 'storestyle';
-	private static $submitKey = 'css_submit';
 
 	public function __construct()
 	{
@@ -70,11 +69,14 @@ class multistorecss extends Module
 	public function getContent()
 	{
 		$output = '';
-		if(Tools::isSubmit($this->getSubmitId(multistorecss::$submitKey))) {
+		if(Tools::isSubmit($this->getSubmitId())) {
 			$storeStyle = strval(Tools::getValue(multistorecss::$cssKey));
 			if($storeStyle) {
 				Configuration::updateValue(multistorecss::$cssKey, $storeStyle);
 				$output = $this->displayConfirmation($this->l('CSS updated'));
+			} else {
+				// TODO: What would cause this? How should the users respond?
+				$output = $this->displayError($this->l('Could not access the CSS rules. Restart your browser and try again.'));
 			}
 		}
 		return $output . $this->displayForm();
@@ -104,7 +106,6 @@ class multistorecss extends Module
 			),
 			'submit' => array(
 				'title' => $this->l('Save'),
-				'name' => multistorecss::$submitKey,
 				'class' => 'button'
 			)
 		);
